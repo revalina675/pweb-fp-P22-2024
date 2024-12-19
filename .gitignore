@@ -1,0 +1,11 @@
+back-end/node_modules/
+front-end/node_modules/
+back-end/.env
+back-end/dist/
+front-end/dist/
+.vscode/
+.idea/
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
