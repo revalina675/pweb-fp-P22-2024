@@ -3,11 +3,13 @@ const bcrypt = require("bcryptjs");
 
 // Skema User
 const userSchema = new mongoose.Schema({
-    username: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    role: { type: String, enum: ["USER", "ADMIN"], default: "USER" },
-    email: { type: String, unique: true }, // Pastikan email tidak null
-  });  
+  username: { type: String, required: true },
+  password: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  role: { type: String, required: true }
+});
+
+module.exports = mongoose.model('User', userSchema);
 
 // Middleware untuk hash password sebelum menyimpan user
 userSchema.pre("save", async function (next) {
