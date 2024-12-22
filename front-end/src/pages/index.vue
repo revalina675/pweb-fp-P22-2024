@@ -39,13 +39,20 @@ const handleLogin = async () => {
     // Extract token and user data
     const { token, user } = response.data;
 
+    // Log the user role to check its value
+    console.log("User role:", user.role);
+
     // Save token and user information in localStorage
     localStorage.setItem("token", token);
     localStorage.setItem("username", user.username);
     localStorage.setItem("role", user.role);
 
-    // Redirect to the facility page after successful login
-    router.push("/facility");
+    // Redirect to the appropriate page after successful login
+    if (user.role === "ADMIN") {
+      router.push("/dashboard");
+    } else {
+      router.push("/facility");
+    }
   } catch (error) {
     // Show error message if login fails
     errorMessage.value = error.response?.data?.message || "Terjadi kesalahan!";
