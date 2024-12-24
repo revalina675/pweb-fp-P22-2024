@@ -4,7 +4,8 @@
     <form @submit.prevent="handleLogin">
       <input v-model="form.username" placeholder="Username" required />
       <input v-model="form.password" type="password" placeholder="Password" required />
-      <select v-model="form.role">
+      <select v-model="form.role" required>
+        <option value="">Select Role</option>
         <option value="USER">User</option>
         <option value="ADMIN">Admin</option>
       </select>
@@ -24,7 +25,7 @@ const router = useRouter();
 const form = reactive({
   username: "",
   password: "",
-  role: "USER",
+  role: "", // Default value empty to enforce selection
 });
 
 const errorMessage = ref("");
@@ -34,6 +35,7 @@ const handleLogin = async () => {
     const response = await axios.post("http://localhost:3000/api/auth/login", {
       username: form.username,
       password: form.password,
+      role: form.role, // Include role in the request
     });
 
     // Extract token and user data

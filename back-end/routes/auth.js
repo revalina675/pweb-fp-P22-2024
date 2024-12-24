@@ -1,5 +1,5 @@
 const express = require("express");
-const router = express.Router();
+const router = express.Router(); // INI WAJIB ADA
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
@@ -8,7 +8,6 @@ const User = require("../models/User");
 router.post("/register", async (req, res) => {
   const { username, password, email, role } = req.body;
 
-  // Validate role input to only accept 'USER' or 'ADMIN'
   if (!["USER", "ADMIN"].includes(role)) {
     return res
       .status(400)
@@ -16,20 +15,18 @@ router.post("/register", async (req, res) => {
   }
 
   try {
-    // Check if email already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
-    // Hash password before saving to DB
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = new User({
       username,
       password: hashedPassword,
       email,
-      role, // Role is passed from request body
+      role,
     });
     await user.save();
     res.status(201).json({ message: "User registered successfully!" });
@@ -40,19 +37,28 @@ router.post("/register", async (req, res) => {
 
 // Login route
 router.post("/login", async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, role } = req.body;
 
   try {
-    console.log("Login attempt:", { username }); // Debugging purpose
-
-    // Find user
+    // Cari user berdasarkan username
     const user = await User.findOne({ username });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-    // Check password
+    // Cek password
     const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword)
+    if (!isValidPassword) {
       return res.status(401).json({ message: "Invalid password" });
+    }
+
+    // Validasi role
+    if (!role) {
+      return res.status(400).json({ message: "Role is required" });
+    }
+    if (user.role !== role) {
+      return res.status(403).json({ message: "Role mismatch" });
+    }
 
     // Generate token
     const token = jwt.sign(
@@ -61,7 +67,6 @@ router.post("/login", async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    // Send response
     res.status(200).json({
       message: "Login successful",
       token,
@@ -72,7 +77,7 @@ router.post("/login", async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Login error:", error.message);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
